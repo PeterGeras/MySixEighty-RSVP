@@ -12,6 +12,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
+from Event import Event
 import config
 
 # Constants
@@ -21,7 +22,6 @@ SHORT_TIME = 0.2 * SEC
 ELEMENT_WAIT_TIME = 2 * SEC
 PAGE_WAIT_TIME = 10 * SEC
 LOGIN_WAIT_TIME = 2 * MIN
-MAX_TRIES = 100
 
 cwd = os.getcwd()
 
@@ -72,8 +72,10 @@ def events_load():
     driver.get(config.EVENTS_URL)
     time.sleep(ELEMENT_WAIT_TIME)
 
+    max_tries = int(PAGE_WAIT_TIME/SHORT_TIME)
+
     # Loads second week of events
-    for i in range(MAX_TRIES):
+    for i in range(max_tries):
         time.sleep(SHORT_TIME)
         # Forces load of events second week by scrolling to bottom and back to top
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -95,7 +97,7 @@ def events_load():
     return True
 
 
-def find_events():
+def find_events(events):
 
     try:
         events_form = driver.find_element_by_class_name("events-week-list")
@@ -105,8 +107,11 @@ def find_events():
 
     events_list = events_form.find_elements_by_xpath(".//div[@class='event-card']")
 
-    for event in events_list:
-        print("-------\n" + event.text)
+    for e in events_list:
+        events.append(Event(e))
+
+    for e in events:
+        e.get_event()
 
     return True
 
@@ -114,9 +119,11 @@ def find_events():
 def main():
     start = timeit.default_timer()
 
+    events = []
+
     login_load()
     events_load()
-    find_events()
+    find_events(events)
 
     stop = timeit.default_timer()
 

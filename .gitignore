@@ -1,4 +1,4 @@
 venv/
 .idea/
 
-login_user_pass.xlsx
+login_user_pass*.xlsx
