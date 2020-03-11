@@ -16,14 +16,16 @@ from Event import Event
 import config
 
 # Constants
+THIS_WEEK = 1
+NEXT_WEEK = THIS_WEEK + 1
+
+# Time
 SEC = 1
 MIN = 60
 SHORT_TIME = 0.2 * SEC
 ELEMENT_WAIT_TIME = 2 * SEC
 PAGE_WAIT_TIME = 10 * SEC
 LOGIN_WAIT_TIME = 2 * MIN
-
-cwd = os.getcwd()
 
 # Browser
 driver = config.driver
@@ -97,7 +99,8 @@ def events_load():
     return True
 
 
-def find_events(events):
+def events_find():
+    events = []
 
     try:
         events_form = driver.find_element_by_class_name("events-week-list")
@@ -105,25 +108,31 @@ def find_events(events):
         print("div should have been found earlier in events_load function")
         return False
 
-    events_list = events_form.find_elements_by_xpath(".//div[@class='event-card']")
+    events_week = events_form.find_elements_by_xpath(".//div[@class='event-week']")
+    if len(events_week) != 2:
+        print("Number of weeks found is not 2, continuing...")
 
-    for e in events_list:
-        events.append(Event(e))
+    # This week, next week etc.
+    # Enumeration - https://www.geeksforgeeks.org/enumerate-in-python/
+    for week, event_week in enumerate(events_week, THIS_WEEK):
+        event_cards = event_week.find_elements_by_xpath(".//div[@class='event-card']")
+        for e in event_cards:
+            events.append(Event(week, e))
 
-    for e in events:
-        e.get_event()
-
-    return True
+    return events
 
 
 def main():
     start = timeit.default_timer()
 
-    events = []
-
     login_load()
     events_load()
-    find_events(events)
+    all_events = events_find()
+
+    goto_events = config.get_events_options()
+
+    for e in all_events:
+        e.get_event()
 
     stop = timeit.default_timer()
 

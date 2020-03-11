@@ -3,39 +3,27 @@ import xlrd
 from sys import platform
 from selenium import webdriver
 
-# Current working directory
+# Working directories
 cwd = os.getcwd()
-file_directory = os.path.join(cwd, 'output')
+drivers = os.path.join(cwd, 'drivers')
 
 # Browser
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--start-maximized")
 
 if platform == "win32":
-    driver = webdriver.Chrome(os.path.join(cwd, 'chromedriver-win-80'), chrome_options=chrome_options)
+    driver = webdriver.Chrome(os.path.join(drivers, 'chromedriver-win-80'), chrome_options=chrome_options)
 elif platform == "linux":
-    driver = webdriver.Chrome(os.path.join(cwd, 'chromedriver-linux-80'), chrome_options=chrome_options)
+    driver = webdriver.Chrome(os.path.join(drivers, 'chromedriver-linux-80'), chrome_options=chrome_options)
 
 # URL config
 HOME_URL = 'https://mysixeighty.com.au'
 LOGIN_URL = HOME_URL + '/user/login'
 EVENTS_URL = HOME_URL + '/events'
 
-# Constants
-SEC = 1
-MIN = 60
-PAGE_WAIT_TIME = 1 * MIN
-ELEMENT_WAIT_TIME = 5 * SEC
-END_PROGRAM_WAIT_TIME = 2 * MIN
-
-MAX_TRIES = 3
-
 # User config
 LOGIN_DETAILS = cwd + r'\login_user_pass.xlsx'
-URL_LIST = cwd + r'\url_check.xlsx'
-
-# Input files/folders
-REPORTS_DIR = cwd + r'\_reports'
+EVENTS = cwd + r'\events_selection.xlsx'
 
 Login_Data = {
     'email': '',
@@ -60,3 +48,7 @@ def get_login_data():
     Login_Data['password'] = password
 
     return True
+
+
+def get_events_options():
+    pass
