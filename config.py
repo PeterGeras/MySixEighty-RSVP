@@ -30,6 +30,15 @@ Login_Data = {
     'password': ''
 }
 
+# Weeks
+THIS_WEEK = 1
+NEXT_WEEK = THIS_WEEK + 1
+
+Week = {
+    'This': THIS_WEEK,
+    'Next': NEXT_WEEK
+}
+
 
 def get_login_data():
     # Update Login_Data dictionary
@@ -50,5 +59,18 @@ def get_login_data():
     return True
 
 
-def get_events_options():
-    pass
+def get_events_selected():
+    wb = xlrd.open_workbook(EVENTS)
+    sheet = wb.sheet_by_index(0)
+    events = []
+
+    print("Looking for these events:")
+    for i in range(1, sheet.nrows):
+        go = sheet.cell_value(i, 0)
+        if go == "Yes":
+            name = sheet.cell_value(i, 1)
+            week = sheet.cell_value(i, 3)
+            events.append((name, Week[week]))
+            print(week + " week - " + name)
+
+    return events

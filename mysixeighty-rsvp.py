@@ -15,10 +15,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 from Event import Event
 import config
 
-# Constants
-THIS_WEEK = 1
-NEXT_WEEK = THIS_WEEK + 1
-
 # Time
 SEC = 1
 MIN = 60
@@ -108,14 +104,23 @@ def events_find():
         print("div should have been found earlier in events_load function")
         return False
 
-    events_week = events_form.find_elements_by_xpath(".//div[@class='event-week']")
+    try:
+        events_week = events_form.find_elements_by_xpath(".//div[@class='event-week']")
+    except:
+        print("Page code structure changed, aborting")
+        return False
+
     if len(events_week) != 2:
         print("Number of weeks found is not 2, continuing...")
 
     # This week, next week etc.
     # Enumeration - https://www.geeksforgeeks.org/enumerate-in-python/
-    for week, event_week in enumerate(events_week, THIS_WEEK):
-        event_cards = event_week.find_elements_by_xpath(".//div[@class='event-card']")
+    for week, event_week in enumerate(events_week, config.THIS_WEEK):
+        try:
+            event_cards = event_week.find_elements_by_xpath(".//div[@class='event-card']")
+        except:
+            print("Page code structure changed, aborting")
+            return False
         for e in event_cards:
             events.append(Event(week, e))
 
@@ -125,23 +130,29 @@ def events_find():
 def main():
     start = timeit.default_timer()
 
-    login_load()
-    events_load()
+    # Get events from workbook that user wants to go to
+    goto_events = config.get_events_selected()
+    if len(goto_events) == 0:
+        print("No selected events from " + config.EVENTS + " found")
+        return False
+
+    if login_load() is False:
+        return False
+
+    if events_load() is False:
+        return False
+
     all_events = events_find()
-
-    goto_events = config.get_events_options()
-
-    for e in all_events:
-        e.get_event()
 
     stop = timeit.default_timer()
 
     print("Program run time: " + "{0:.1f}".format(stop - start) + "s")
 
     time.sleep(MIN)
-    driver.close()
 
     return True
 
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()
+    driver.close()
