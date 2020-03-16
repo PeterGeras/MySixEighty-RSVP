@@ -4,7 +4,6 @@ import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.keys import Keys
 
 import config
 from Event import Event
@@ -18,6 +17,8 @@ SHORT_TIME = 0.2 * SEC
 ELEMENT_WAIT_TIME = 2 * SEC
 PAGE_WAIT_TIME = 10 * SEC
 LOGIN_WAIT_TIME = 2 * MIN
+
+MAX_TRIES = int(PAGE_WAIT_TIME / SHORT_TIME)
 
 # Browser
 driver = config.driver
@@ -66,10 +67,8 @@ def events_load():
     driver.get(config.EVENTS_URL)
     time.sleep(ELEMENT_WAIT_TIME)
 
-    max_tries = int(PAGE_WAIT_TIME/SHORT_TIME)
-
     # Loads second week of events
-    for i in range(max_tries):
+    for i in range(MAX_TRIES):
         time.sleep(SHORT_TIME)
         # Forces load of events second week by scrolling to bottom and back to top
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -123,6 +122,37 @@ def events_find():
     return events
 
 
+def check_event_status(event):
+    # Open tab
+    driver.execute_script("window.open('');")
+    driver.switch_to.window(driver.window_handles[-1])
+
+    # Load page
+    driver.get(event.url)
+
+    rsvp_text = ""
+
+    for i in range(MAX_TRIES):
+        time.sleep(SHORT_TIME)
+
+        rsvp = driver.find_element_by_class_name("rsvp-button")
+        rsvp_text = rsvp.text
+        if rsvp_text != "Loading...":
+            print(rsvp_text)
+            break
+    else:
+        print(event.url + " - URL not loading RSVP status")
+        rsvp_text = ""
+
+    time.sleep(PAGE_WAIT_TIME)
+
+    # Close tab
+    driver.execute_script("window.close('');")
+    driver.switch_to.window(driver.window_handles[0])
+
+    return
+
+
 def main():
     start = timeit.default_timer()
 
@@ -148,6 +178,10 @@ def main():
 
     missing_list = difference_events_lists(goto_events, intersection_list)
     print_event_list_details("Missing list", missing_list)
+
+    # Check events that exist
+    for event in intersection_list:
+        check_event_status(event)
 
     stop = timeit.default_timer()
 
