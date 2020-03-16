@@ -3,6 +3,8 @@ import xlrd
 from sys import platform
 from selenium import webdriver
 
+from Event import Event
+
 # Working directories
 cwd = os.getcwd()
 drivers = os.path.join(cwd, 'drivers')
@@ -33,7 +35,6 @@ Login_Data = {
 # Weeks
 THIS_WEEK = 1
 NEXT_WEEK = THIS_WEEK + 1
-
 Week = {
     'This': THIS_WEEK,
     'Next': NEXT_WEEK
@@ -64,13 +65,15 @@ def get_events_selected():
     sheet = wb.sheet_by_index(0)
     events = []
 
-    print("Looking for these events:")
     for i in range(1, sheet.nrows):
         go = sheet.cell_value(i, 0)
         if go == "Yes":
             name = sheet.cell_value(i, 1)
             week = sheet.cell_value(i, 3)
-            events.append((name, Week[week]))
-            print(week + " week - " + name)
+            events.append(Event.set_from_excel(Week[week], name))
+
+    print("\nLooking for these events:\n-------")
+    for e in events:
+        e.get_event()
 
     return events

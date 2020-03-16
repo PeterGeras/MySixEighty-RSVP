@@ -122,9 +122,24 @@ def events_find():
             print("Page code structure changed, aborting")
             return False
         for e in event_cards:
-            events.append(Event(week, e))
+            events.append(Event.set_from_div(week, e))
 
     return events
+
+
+def intersection_events_lists(list_a, list_b):
+    intersection_list = []
+
+    for e in list_a:
+        for f in list_b:
+            if e == f:
+                # e or f has the URL
+                if e.url > f.url:
+                    intersection_list.append(e)
+                else:
+                    intersection_list.append(f)
+
+    return intersection_list
 
 
 def main():
@@ -143,6 +158,16 @@ def main():
         return False
 
     all_events = events_find()
+
+    print("\nFound these events:\n-------")
+    for e in all_events:
+        e.get_event()
+
+    intersection_list = intersection_events_lists(goto_events, all_events)
+
+    print("\nIntersection list:\n-------")
+    for i in intersection_list:
+        i.get_event()
 
     stop = timeit.default_timer()
 
