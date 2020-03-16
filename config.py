@@ -4,6 +4,7 @@ from sys import platform
 from selenium import webdriver
 
 from Event import Event
+from Event import print_event_list_details
 
 # Working directories
 cwd = os.getcwd()
@@ -70,10 +71,7 @@ def get_events_selected():
         if go == "Yes":
             name = sheet.cell_value(i, 1)
             week = sheet.cell_value(i, 3)
-            events.append(Event.set_from_excel(Week[week], name))
-
-    print("\nLooking for these events:\n-------")
-    for e in events:
-        e.get_event()
+            event = Event.set_from_excel(Week[week], name)
+            events.append(event)
 
     return events

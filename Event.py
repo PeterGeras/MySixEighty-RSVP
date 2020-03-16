@@ -4,6 +4,17 @@ class Event(object):
         self.title = title.strip()
         self.url = url.strip()
 
+    # To help define set intersection which excludes the URL
+    def __hash__(self):
+        return hash((self.week, self.title))
+
+    # Equality of objects called with event_1 == event_2
+    def __eq__(self, other):
+        return self.week == other.week and self.title == other.title
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     # Define Event(object) by these methods
     # cls parameter refers to class within this class, such as self
     # https://stackoverflow.com/questions/2164258/multiple-constructors-in-python
@@ -18,13 +29,41 @@ class Event(object):
         # We do not have a URL for the events from the excel file
         return cls(week, title, '')
 
-    # Called with event_1 == event_2
-    def __eq__(self, other):
-        return self.week == other.week and self.title == other.title
-
     def get_event(self):
-        print_url = self.url
-        if not print_url:
-            print_url = '<empty>'
-        print("Week: " + str(self.week) + "\n" + self.title + "\n" + print_url + "\n-------")
+        print(self.title)
+        print("Week " + str(self.week))
+        if self.url:
+            print(self.url)
+        print("-------")
+        return
 
+
+def print_event_list_details(header, this_list):
+    header_outline = (len(header) + 2)*"="
+
+    print("\n" + header_outline + "\n " + header + "\n" + header_outline)
+
+    for i in this_list:
+        i.get_event()
+
+    return
+
+
+def sort_key(event):
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    event_day = event.title.split(' ')[0].capitalize()
+
+    try:
+        day_index = days.index(event_day)
+    except ValueError:
+        day_index = len(days)
+
+    return str(event.week) + str(day_index) + event.title.lower()
+
+
+def intersection_events_lists(list_a, list_b):
+    return sorted(set(list_a).intersection(list_b), key=sort_key)
+
+
+def difference_events_lists(list_a, list_b):
+    return sorted(set(list_a).difference(list_b), key=sort_key)

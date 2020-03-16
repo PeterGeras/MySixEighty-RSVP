@@ -1,19 +1,15 @@
-import os
-import re
 import timeit
 import time
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 
-from Event import Event
 import config
+from Event import Event
+from Event import print_event_list_details, intersection_events_lists, difference_events_lists
+
 
 # Time
 SEC = 1
@@ -127,26 +123,13 @@ def events_find():
     return events
 
 
-def intersection_events_lists(list_a, list_b):
-    intersection_list = []
-
-    for e in list_a:
-        for f in list_b:
-            if e == f:
-                # e or f has the URL
-                if e.url > f.url:
-                    intersection_list.append(e)
-                else:
-                    intersection_list.append(f)
-
-    return intersection_list
-
-
 def main():
     start = timeit.default_timer()
 
     # Get events from workbook that user wants to go to
     goto_events = config.get_events_selected()
+    print_event_list_details("Looking for these events", goto_events)
+
     if len(goto_events) == 0:
         print("No selected events from " + config.EVENTS + " found")
         return False
@@ -158,16 +141,13 @@ def main():
         return False
 
     all_events = events_find()
-
-    print("\nFound these events:\n-------")
-    for e in all_events:
-        e.get_event()
+    print_event_list_details("Found these events", all_events)
 
     intersection_list = intersection_events_lists(goto_events, all_events)
+    print_event_list_details("Intersection list", intersection_list)
 
-    print("\nIntersection list:\n-------")
-    for i in intersection_list:
-        i.get_event()
+    missing_list = difference_events_lists(goto_events, intersection_list)
+    print_event_list_details("Missing list", missing_list)
 
     stop = timeit.default_timer()
 
