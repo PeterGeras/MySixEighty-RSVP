@@ -4,6 +4,7 @@ import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
 
 import config
 from Event import Event
@@ -130,27 +131,50 @@ def check_event_status(event):
     # Load page
     driver.get(event.url)
 
-    rsvp_text = ""
+    found = False
 
     for i in range(MAX_TRIES):
         time.sleep(SHORT_TIME)
 
-        rsvp = driver.find_element_by_class_name("rsvp-button")
-        rsvp_text = rsvp.text
-        if rsvp_text != "Loading...":
-            print(rsvp_text)
+        try:
+            rsvp = driver.find_element_by_class_name("rsvp-button")
+        except NoSuchElementException:
+            try:
+                # If previous element not found but this one is found, something is wrong
+                driver.find_element_by_class_name("field-name-rsvp-button")
+                break
+            except NoSuchElementException:
+                # Neither element found, possibly not loaded, try again
+                continue
+
+        rsvp_first_text = rsvp.text.split('\n')[0]
+        if rsvp_first_text != "Loading...":
+            found = True
             break
     else:
         print(event.url + " - URL not loading RSVP status")
-        rsvp_text = ""
 
-    time.sleep(PAGE_WAIT_TIME)
+    print("found = " + str(found))
+
+    if found:
+        print("rsvp_first_text = " + rsvp_first_text)
+        if rsvp_first_text == "RSVP":
+            try:
+                rsvp.find_element_by_tag_name('a').click()
+                time.sleep(SEC)
+                driver.find_element_by_class_name("confirm-button").click()
+            except:
+                print("Failed to RSVP to event. Not trying this event again.")
+        elif rsvp_first_text == "You're going":
+            pass
+
+    time.sleep(PAGE_WAIT_TIME/2)
 
     # Close tab
     driver.execute_script("window.close('');")
     driver.switch_to.window(driver.window_handles[0])
 
-    return
+    return found
 
 
 def main():
@@ -181,7 +205,7 @@ def main():
 
     # Check events that exist
     for event in intersection_list:
-        check_event_status(event)
+        found_event = check_event_status(event)
 
     stop = timeit.default_timer()
 
