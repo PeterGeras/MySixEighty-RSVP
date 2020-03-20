@@ -1,23 +1,16 @@
 import os
 import xlrd
-from sys import platform
 from selenium import webdriver
 
 from Event import Event
-from Event import print_event_list_details
 
 # Working directories
 cwd = os.getcwd()
 drivers = os.path.join(cwd, 'drivers')
 
 # Browser
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_argument("--start-maximized")
-
-if platform == "win32":
-    driver = webdriver.Chrome(os.path.join(drivers, 'chromedriver-win-80'), chrome_options=chrome_options)
-elif platform == "linux":
-    driver = webdriver.Chrome(os.path.join(drivers, 'chromedriver-linux-80'), chrome_options=chrome_options)
+driver_loc = os.path.join(drivers, 'geckodriver-win-v0.26')
+driver = webdriver.Firefox(executable_path=driver_loc)
 
 # URL config
 HOME_URL = 'https://mysixeighty.com.au'
@@ -35,7 +28,7 @@ Login_Data = {
 
 # Weeks
 THIS_WEEK = 1
-NEXT_WEEK = THIS_WEEK + 1
+NEXT_WEEK = 2
 Week = {
     'This': THIS_WEEK,
     'Next': NEXT_WEEK
