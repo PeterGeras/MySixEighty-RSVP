@@ -9,7 +9,7 @@ from selenium.common.exceptions import NoSuchElementException
 import config
 from Event import Event
 from Event import print_event_list_details, intersection_events_lists, difference_events_lists
-
+from event_rsvp import event_rsvp
 
 # Time
 SEC = 1
@@ -49,14 +49,18 @@ def login_load():
         # Enter login details manually
         print("Please log in manually...")
         try:
-            WebDriverWait(driver, LOGIN_WAIT_TIME).until(EC.presence_of_element_located((By.ID, account_logged_id)))
+            WebDriverWait(driver, LOGIN_WAIT_TIME).until(
+                EC.presence_of_element_located((By.ID, account_logged_id))
+            )
         except:
             print("Login took too long")
             return False
 
     # Check login happened and redirected to main page
     try:
-        WebDriverWait(driver, PAGE_WAIT_TIME).until(EC.presence_of_element_located((By.ID, account_logged_id)))
+        WebDriverWait(driver, PAGE_WAIT_TIME).until(
+            EC.presence_of_element_located((By.ID, account_logged_id))
+        )
     except:
         print("Login redirection to main page failed? div_id " + account_logged_id + " not found")
         return False
@@ -123,60 +127,6 @@ def events_find():
     return events
 
 
-def check_event_status(event):
-    # Open tab
-    driver.execute_script("window.open('');")
-    driver.switch_to.window(driver.window_handles[-1])
-
-    # Load page
-    driver.get(event.url)
-
-    found = False
-
-    for i in range(MAX_TRIES):
-        time.sleep(SHORT_TIME)
-
-        try:
-            rsvp = driver.find_element_by_class_name("rsvp-button")
-        except NoSuchElementException:
-            try:
-                # If previous element not found but this one is found, something is wrong
-                driver.find_element_by_class_name("field-name-rsvp-button")
-                break
-            except NoSuchElementException:
-                # Neither element found, possibly not loaded, try again
-                continue
-
-        rsvp_first_text = rsvp.text.split('\n')[0]
-        if rsvp_first_text != "Loading...":
-            found = True
-            break
-    else:
-        print(event.url + " - URL not loading RSVP status")
-
-    print("found = " + str(found))
-
-    if found:
-        print("rsvp_first_text = " + rsvp_first_text)
-        if rsvp_first_text == "RSVP":
-            try:
-                rsvp.find_element_by_tag_name('a').click()
-                time.sleep(SEC)
-                driver.find_element_by_class_name("confirm-button").click()
-            except:
-                print("Failed to RSVP to event. Not trying this event again.")
-        elif rsvp_first_text == "You're going":
-            pass
-
-    time.sleep(PAGE_WAIT_TIME/2)
-
-    # Close tab
-    driver.execute_script("window.close('');")
-    driver.switch_to.window(driver.window_handles[0])
-
-    return found
-
-
 def main():
     start = timeit.default_timer()
 
@@ -203,9 +153,11 @@ def main():
     missing_list = difference_events_lists(goto_events, intersection_list)
     print_event_list_details("Missing list", missing_list)
 
-    # Check events that exist
     for event in intersection_list:
-        found_event = check_event_status(event)
+        rsvp_completed = event_rsvp(driver, event)  # TODO: Deal with status of event that's filled
+        if rsvp_completed:
+            # TODO: Remove event from intersection_list
+            pass
 
     stop = timeit.default_timer()
 
