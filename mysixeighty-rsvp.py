@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 
 import config
 from Event import Event
@@ -70,23 +71,28 @@ def login_load():
 
 def events_load():
     driver.get(config.EVENTS_URL)
-    time.sleep(ELEMENT_WAIT_TIME)
+
+    event_week_class = "event-week"
+
+    try:
+        WebDriverWait(driver, PAGE_WAIT_TIME).until(
+            EC.presence_of_element_located(By.CLASS_NAME, event_week_class)
+        )
+    except TimeoutException:
+        print("# Events page not loading")
+        return False
 
     # Loads second week of events
     for i in range(MAX_TRIES):
         time.sleep(SHORT_TIME)
+
         # Forces load of events second week by scrolling to bottom and back to top
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         driver.execute_script("window.scrollTo(0, 0);")
 
-        try:
-            element_list = driver.find_elements_by_class_name("event-week")
-            count_weeks = len(element_list)
-        except:
-            continue
-
-        if count_weeks > 1:
-            # Found second week
+        # Find second week
+        event_weeks = driver.find_elements_by_class_name(event_week_class)
+        if len(event_weeks) > 1:
             break
     else:
         print("# Events page not loading second week")
@@ -161,6 +167,7 @@ def main():
                 completed_list.append(event)
         intersection_list = difference_events_lists(intersection_list, completed_list)
         print_event_list_details("Events chosen & found & to RSVP", intersection_list)
+        time.sleep(PAGE_WAIT_TIME)
 
     stop = timeit.default_timer()
 

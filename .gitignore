@@ -1,7 +1,11 @@
 .idea/
-logs/
 venv/
-tests/
+
+logs/*.*
+!logs/.gitkeep
+
+tests/*.*
+!tests/.gitkeep
 
 login_user_pass*.xlsx
 Application.exe
