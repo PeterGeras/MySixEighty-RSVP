@@ -7,10 +7,11 @@ from Event import Event
 # Working directories
 cwd = os.getcwd()
 drivers = os.path.join(cwd, 'drivers')
+logs = os.path.join(cwd, 'logs')
 
 # Browser
 driver_loc = os.path.join(drivers, 'geckodriver-win-v0.26')
-driver = webdriver.Firefox(executable_path=driver_loc)
+driver = webdriver.Firefox(executable_path=driver_loc, log_path=os.path.join(logs, 'geckodriver.log'))
 
 # URL config
 HOME_URL = 'https://mysixeighty.com.au'
@@ -45,7 +46,7 @@ def get_login_data():
         email = ws_login.cell(1, 0).value
         password = ws_login.cell(1, 1).value
     except:
-        print("Failed to grab email and password data from: " + LOGIN_DETAILS)
+        print("# Failed to grab email and password data from: " + LOGIN_DETAILS)
         return False
 
     Login_Data['email'] = email

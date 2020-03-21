@@ -53,9 +53,9 @@ def find_rsvp():
         rsvp_text = rsvp.text.split("\n")[0]
 
     except TimeoutException:
-        print("Failed to find RSVP container")
+        print("# Failed to find RSVP container")
     except NoSuchElementException:
-        print("RSVP button not available")
+        print("# RSVP button not available")
 
     print("rsvp_text = " + str(rsvp_text))
 
@@ -72,12 +72,12 @@ def click_rsvp(rsvp):
             WebDriverWait(driver, ELEMENT_WAIT_TIME)\
                 .until(EC.presence_of_element_located((By.CLASS_NAME, "confirm-button")))\
                 .click()
-            print("RSVPed to: " + event.title)
+            print("# RSVPed to: " + event.title)
             rsvp_completed = True
         except:
-            print("Failed to RSVP to: " + event.title)
+            print("# Failed to RSVP to: " + event.title)
     elif rsvp_first_text == "You're going":
-        print("Already going to: " + event.title)
+        print("# Already going to: " + event.title)
         rsvp_completed = True
 
     return rsvp_completed

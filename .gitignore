@@ -1,5 +1,7 @@
-venv/
 .idea/
-test*
+logs/
+venv/
+tests/
 
 login_user_pass*.xlsx
+Application.exe

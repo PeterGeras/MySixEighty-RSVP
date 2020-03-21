@@ -43,17 +43,17 @@ def login_load():
             login = driver.find_element_by_id("edit-submit")
             login.click()
         except:
-            print("Logging in automatically failed")
+            print("# Logging in automatically failed")
             return False
     else:
         # Enter login details manually
-        print("Please log in manually...")
+        print("# Please log in manually...")
         try:
             WebDriverWait(driver, LOGIN_WAIT_TIME).until(
                 EC.presence_of_element_located((By.ID, account_logged_id))
             )
         except:
-            print("Login took too long")
+            print("# Login took too long")
             return False
 
     # Check login happened and redirected to main page
@@ -62,7 +62,7 @@ def login_load():
             EC.presence_of_element_located((By.ID, account_logged_id))
         )
     except:
-        print("Login redirection to main page failed? div_id " + account_logged_id + " not found")
+        print("# Login redirection to main page failed? div_id " + account_logged_id + " not found")
         return False
 
     return True
@@ -89,7 +89,7 @@ def events_load():
             # Found second week
             break
     else:
-        print("Events page not loading second week")
+        print("# Events page not loading second week")
         return False
 
     return True
@@ -101,17 +101,17 @@ def events_find():
     try:
         events_form = driver.find_element_by_class_name("events-week-list")
     except:
-        print("div should have been found earlier in events_load function")
+        print("# div should have been found earlier in events_load function")
         return False
 
     try:
         events_week = events_form.find_elements_by_xpath(".//div[@class='event-week']")
     except:
-        print("Page code structure changed, aborting")
+        print("# Page code structure changed, aborting")
         return False
 
     if len(events_week) != 2:
-        print("Number of weeks found is not 2, continuing...")
+        print("# Number of weeks found is not 2, continuing...")
 
     # This week, next week etc.
     # Enumeration - https://www.geeksforgeeks.org/enumerate-in-python/
@@ -119,7 +119,7 @@ def events_find():
         try:
             event_cards = event_week.find_elements_by_xpath(".//div[@class='event-card']")
         except:
-            print("Page code structure changed, aborting")
+            print("# Page code structure changed, aborting")
             return False
         for e in event_cards:
             events.append(Event.set_from_div(week, e))
@@ -132,10 +132,10 @@ def main():
 
     # Get events from workbook that user wants to go to
     goto_events = config.get_events_selected()
-    print_event_list_details("Looking for these events", goto_events)
+    print_event_list_details("Events chosen to look for", goto_events)
 
     if len(goto_events) == 0:
-        print("No selected events from " + config.EVENTS + " found")
+        print("# No selected events from " + config.EVENTS + " found")
         return False
 
     if login_load() is False:
@@ -145,19 +145,22 @@ def main():
         return False
 
     all_events = events_find()
-    print_event_list_details("Found these events", all_events)
+    print_event_list_details("Events found on the webpage", all_events)
 
     intersection_list = intersection_events_lists(goto_events, all_events)
-    print_event_list_details("Intersection list", intersection_list)
+    print_event_list_details("Events chosen & found", intersection_list)
 
     missing_list = difference_events_lists(goto_events, intersection_list)
-    print_event_list_details("Missing list", missing_list)
+    print_event_list_details("Events chosen & not found", missing_list)
 
-    for event in intersection_list:
-        rsvp_completed = event_rsvp(driver, event)  # TODO: Deal with status of event that's filled
-        if rsvp_completed:
-            # TODO: Remove event from intersection_list
-            pass
+    completed_list = []
+    while len(intersection_list) > 0 or len(missing_list) > 0:
+        for event in intersection_list:
+            rsvp_completed = event_rsvp(driver, event)  # TODO: Deal with status of event that's filled
+            if rsvp_completed:
+                completed_list.append(event)
+        intersection_list = difference_events_lists(intersection_list, completed_list)
+        print_event_list_details("Events chosen & found & to RSVP", intersection_list)
 
     stop = timeit.default_timer()
 

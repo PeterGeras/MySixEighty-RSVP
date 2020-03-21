@@ -34,7 +34,6 @@ class Event(object):
         print("Week " + str(self.week))
         if self.url:
             print(self.url)
-        print("-------")
         return
 
 
@@ -43,8 +42,13 @@ def print_event_list_details(header, this_list):
 
     print("\n" + header_outline + "\n " + header + "\n" + header_outline)
 
-    for i in this_list:
-        i.get_event()
+    if len(this_list) > 0:
+        for i in this_list:
+            i.get_event()
+            print("------")
+    else:
+        print("<empty>")
+        print("------")
 
     return
 
@@ -62,8 +66,12 @@ def sort_key(event):
 
 
 def intersection_events_lists(list_a, list_b):
-    return sorted(set(list_a).intersection(list_b), key=sort_key)
+    this_list = set(list_a).intersection(list_b)
+    sorted_list = sorted(this_list, key=sort_key)
+    return sorted_list
 
 
 def difference_events_lists(list_a, list_b):
-    return sorted(set(list_a).difference(list_b), key=sort_key)
+    this_list = set(list_a).difference(list_b)
+    sorted_list = sorted(this_list, key=sort_key)
+    return sorted_list
