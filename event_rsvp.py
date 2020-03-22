@@ -1,4 +1,5 @@
 import time
+import validators
 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -15,19 +16,20 @@ global driver, event
 
 
 def open_window():
-    # Open tab
-    driver.execute_script("window.open('');")
+    driver.execute_script("window.open('');")  # Open tab
     driver.switch_to.window(driver.window_handles[-1])
+    print("url = " + str(event.url))  # TODO: Figure out where invalid URL is coming from
 
-    # Load page
-    driver.get(event.url)
+    valid_url = validators.url(str(event.url))
 
-    return
+    if valid_url:
+        driver.get(event.url)  # Load page
+
+    return valid_url
 
 
 def close_window():
-    # Close tab
-    driver.execute_script("window.close('');")
+    driver.execute_script("window.close('');")  # Close tab
     driver.switch_to.window(driver.window_handles[0])
 
     return
@@ -87,15 +89,13 @@ def event_rsvp(this_driver, this_event):
     global driver, event
     driver = this_driver
     event = this_event
-
     rsvp_completed = False
 
-    open_window()
-
-    rsvp_button = find_rsvp()
-    if rsvp_button:
-        rsvp_completed = click_rsvp(rsvp_button)
-        time.sleep(ELEMENT_WAIT_TIME)
+    if open_window():
+        rsvp_button = find_rsvp()
+        if rsvp_button:
+            rsvp_completed = click_rsvp(rsvp_button)
+            time.sleep(ELEMENT_WAIT_TIME)
 
     close_window()
 

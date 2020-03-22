@@ -76,7 +76,7 @@ def events_load():
 
     try:
         WebDriverWait(driver, PAGE_WAIT_TIME).until(
-            EC.presence_of_element_located(By.CLASS_NAME, event_week_class)
+            EC.presence_of_element_located((By.CLASS_NAME, event_week_class))
         )
     except TimeoutException:
         print("# Events page not loading")
@@ -107,7 +107,7 @@ def events_find():
     try:
         events_form = driver.find_element_by_class_name("events-week-list")
     except:
-        print("# div should have been found earlier in events_load function")
+        print("# div should have been found earlier in events_load()")
         return False
 
     try:
@@ -133,10 +133,9 @@ def events_find():
     return events
 
 
-def main():
-    start = timeit.default_timer()
+def event_looping():
+    completed_list = []
 
-    # Get events from workbook that user wants to go to
     goto_events = config.get_events_selected()
     print_event_list_details("Events chosen to look for", goto_events)
 
@@ -147,32 +146,46 @@ def main():
     if login_load() is False:
         return False
 
-    if events_load() is False:
-        return False
+    # Looping to continue processing events until all processed
+    while True:
+        if events_load() is False:
+            return False
 
-    all_events = events_find()
-    print_event_list_details("Events found on the webpage", all_events)
+        all_events = events_find()
+        print_event_list_details("Events found on the webpage", all_events)
 
-    intersection_list = intersection_events_lists(goto_events, all_events)
-    print_event_list_details("Events chosen & found", intersection_list)
+        intersection_list = intersection_events_lists(all_events, goto_events)
+        # intersection_list = difference_events_lists(intersection_list, completed_list)
+        print_event_list_details("Events chosen & found", intersection_list)
 
-    missing_list = difference_events_lists(goto_events, intersection_list)
-    print_event_list_details("Events chosen & not found", missing_list)
+        missing_list = difference_events_lists(goto_events, intersection_list)
+        print_event_list_details("Events chosen & not found", missing_list)
 
-    completed_list = []
-    while len(intersection_list) > 0 or len(missing_list) > 0:
         for event in intersection_list:
             rsvp_completed = event_rsvp(driver, event)  # TODO: Deal with status of event that's filled
             if rsvp_completed:
                 completed_list.append(event)
+
         intersection_list = difference_events_lists(intersection_list, completed_list)
         print_event_list_details("Events chosen & found & to RSVP", intersection_list)
+
+        # Break condition
+        if len(intersection_list) == 0 and len(missing_list) == 0:
+            break
+
         time.sleep(PAGE_WAIT_TIME)
 
+    return True
+
+
+def main():
+    start = timeit.default_timer()
+
+    event_looping()
+    driver.close()
+
     stop = timeit.default_timer()
-
     print("Program run time: " + "{0:.1f}".format(stop - start) + "s")
-
     time.sleep(MIN)
 
     return True
@@ -180,4 +193,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    driver.close()

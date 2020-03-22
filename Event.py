@@ -1,3 +1,6 @@
+import validators
+
+
 class Event(object):
     def __init__(self, week, title, url):
         self.week = week
@@ -65,9 +68,25 @@ def sort_key(event):
     return str(event.week) + str(day_index) + event.title.lower()
 
 
+# The intersection of sets might return an object with no URL
+def update_intersected_url(input_list, list_a, list_b):
+    for e in input_list:
+        if len(e.url) > 0:
+            break
+        list_a_url = list_a[list_a.index(e)].url
+        list_b_url = list_b[list_b.index(e)].url
+        if validators.url(str(e.url)) is False\
+            or validators.url(str(list_a_url)) is False\
+            or validators.url(str(list_b_url)) is False:
+            pass
+        e.url = max(len(list_a_url), len(list_b_url))
+    return
+
+
 def intersection_events_lists(list_a, list_b):
     this_list = set(list_a).intersection(list_b)
     sorted_list = sorted(this_list, key=sort_key)
+    update_intersected_url(sorted_list, list_a, list_b)
     return sorted_list
 
 
