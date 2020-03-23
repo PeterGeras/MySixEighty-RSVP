@@ -1,6 +1,3 @@
-import validators
-
-
 class Event(object):
     def __init__(self, week, title, url):
         self.week = week
@@ -30,13 +27,19 @@ class Event(object):
     @classmethod
     def set_from_excel(cls, week, title):
         # We do not have a URL for the events from the excel file
-        return cls(week, title, '')
+        return cls(week, title, "")
 
     def get_event(self):
         print(self.title)
-        print("Week " + str(self.week))
+
+        if self.week == 1:
+            print("This week")
+        elif self.week == 2:
+            print("Next week")
+
         if self.url:
             print(self.url)
+
         return
 
 
@@ -68,25 +71,19 @@ def sort_key(event):
     return str(event.week) + str(day_index) + event.title.lower()
 
 
-# The intersection of sets might return an object with no URL
-def update_intersected_url(input_list, list_a, list_b):
-    for e in input_list:
+def intersection_events_lists(list_a, list_b):
+    intersected_list = set(list_a).intersection(list_b)
+
+    # Select object with URL in intersected list
+    for e in intersected_list:
         if len(e.url) > 0:
-            break
+            continue
         list_a_url = list_a[list_a.index(e)].url
         list_b_url = list_b[list_b.index(e)].url
-        if validators.url(str(e.url)) is False\
-            or validators.url(str(list_a_url)) is False\
-            or validators.url(str(list_b_url)) is False:
-            pass
-        e.url = max(len(list_a_url), len(list_b_url))
-    return
+        e.url = max(list_a_url, list_b_url)  # Max of strings alphabetically. Empty string is minimum.
 
+    sorted_list = sorted(intersected_list, key=sort_key)
 
-def intersection_events_lists(list_a, list_b):
-    this_list = set(list_a).intersection(list_b)
-    sorted_list = sorted(this_list, key=sort_key)
-    update_intersected_url(sorted_list, list_a, list_b)
     return sorted_list
 
 

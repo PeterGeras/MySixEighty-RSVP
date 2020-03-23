@@ -63,7 +63,7 @@ def login_load():
             EC.presence_of_element_located((By.ID, account_logged_id))
         )
     except:
-        print("# Login redirection to main page failed? div_id " + account_logged_id + " not found")
+        print(f"# Login redirection to main page failed? div_id {account_logged_id} not found")
         return False
 
     return True
@@ -140,7 +140,7 @@ def event_looping():
     print_event_list_details("Events chosen to look for", goto_events)
 
     if len(goto_events) == 0:
-        print("# No selected events from " + config.EVENTS + " found")
+        print(f"# No selected events from {config.EVENTS} found")
         return False
 
     if login_load() is False:

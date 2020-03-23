@@ -7,6 +7,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 
+from ElementTextMatch import ElementTextMatch
+
 # Time
 SEC = 1
 ELEMENT_WAIT_TIME = 3 * SEC
@@ -44,22 +46,14 @@ def find_rsvp():
         WebDriverWait(driver, PAGE_WAIT_TIME).until(
             EC.presence_of_element_located((By.CLASS_NAME, "field-name-rsvp-button"))
         )
-
-        rsvp = driver.find_element(By.CLASS_NAME, "rsvp-button")
-
-        # TODO: I don't think this is working correctly. rsvp-confirm class is not always available
         WebDriverWait(driver, ELEMENT_WAIT_TIME).until_not(
-            EC.text_to_be_present_in_element((By.CLASS_NAME, "rsvp-confirm"), "Loading...")
+            ElementTextMatch((By.CLASS_NAME, "rsvp-button"), "Loading...")
         )
-
-        rsvp_text = rsvp.text.split("\n")[0]
-
+        rsvp = driver.find_element(By.CLASS_NAME, "rsvp-button")
     except TimeoutException:
         print("# Failed to find RSVP container")
     except NoSuchElementException:
         print("# RSVP button not available")
-
-    print("rsvp_text = " + str(rsvp_text))
 
     return rsvp
 
