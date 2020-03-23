@@ -18,6 +18,7 @@ MIN = 60
 SHORT_TIME = 0.2 * SEC
 ELEMENT_WAIT_TIME = 2 * SEC
 PAGE_WAIT_TIME = 10 * SEC
+LOOP_TIME = 1 * MIN
 LOGIN_WAIT_TIME = 2 * MIN
 
 MAX_TRIES = int(PAGE_WAIT_TIME / SHORT_TIME)
@@ -137,7 +138,7 @@ def event_looping():
     completed_list = []
 
     goto_events = config.get_events_selected()
-    print_event_list_details("Events chosen to look for", goto_events)
+    print_event_list_details(f"Events chosen from {config.EVENTS}", goto_events)
 
     if len(goto_events) == 0:
         print(f"# No selected events from {config.EVENTS} found")
@@ -152,28 +153,29 @@ def event_looping():
             return False
 
         all_events = events_find()
-        print_event_list_details("Events found on the webpage", all_events)
+        print_event_list_details(f"Events found on the website {config.EVENTS_URL}", all_events)
 
         intersection_list = intersection_events_lists(all_events, goto_events)
-        # intersection_list = difference_events_lists(intersection_list, completed_list)
-        print_event_list_details("Events chosen & found", intersection_list)
+        intersection_list = difference_events_lists(intersection_list, completed_list)
+        print_event_list_details("Events chosen & Events found", intersection_list)
 
         missing_list = difference_events_lists(goto_events, intersection_list)
-        print_event_list_details("Events chosen & not found", missing_list)
+        print_event_list_details("Events chosen & Events not found", missing_list)
 
         for event in intersection_list:
+            print(f"\n### ATTEMPTING TO ACCESS EVENTS ###")
             rsvp_completed = event_rsvp(driver, event)  # TODO: Deal with status of event that's filled
             if rsvp_completed:
                 completed_list.append(event)
 
         intersection_list = difference_events_lists(intersection_list, completed_list)
-        print_event_list_details("Events chosen & found & to RSVP", intersection_list)
+        print_event_list_details("Events completed", completed_list)
 
         # Break condition
         if len(intersection_list) == 0 and len(missing_list) == 0:
             break
 
-        time.sleep(PAGE_WAIT_TIME)
+        time.sleep(LOOP_TIME)
 
     return True
 

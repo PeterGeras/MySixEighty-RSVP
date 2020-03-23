@@ -20,7 +20,6 @@ global driver, event
 def open_window():
     driver.execute_script("window.open('');")  # Open tab
     driver.switch_to.window(driver.window_handles[-1])
-    print("url = " + str(event.url))  # TODO: Figure out where invalid URL is coming from
 
     valid_url = validators.url(str(event.url))
 
@@ -68,12 +67,12 @@ def click_rsvp(rsvp):
             WebDriverWait(driver, ELEMENT_WAIT_TIME)\
                 .until(EC.presence_of_element_located((By.CLASS_NAME, "confirm-button")))\
                 .click()
-            print("# RSVPed to: " + event.title)
+            print(f"# RSVPed to - {event.title} - {event.url}")
             rsvp_completed = True
         except:
-            print("# Failed to RSVP to: " + event.title)
+            print(f"# Failed to RSVP to - {event.title} - {event.url}")
     elif rsvp_first_text == "You're going":
-        print("# Already going to: " + event.title)
+        print(f"# Already going to - {event.title} - {event.url}")
         rsvp_completed = True
 
     return rsvp_completed

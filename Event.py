@@ -45,16 +45,16 @@ class Event(object):
 
 def print_event_list_details(header, this_list):
     header_outline = (len(header) + 2)*"="
+    separator = 7*"-"
 
     print("\n" + header_outline + "\n " + header + "\n" + header_outline)
 
     if len(this_list) > 0:
         for i in this_list:
             i.get_event()
-            print("------")
+            print(separator)
     else:
-        print("<empty>")
-        print("------")
+        print(f"<empty>\n{separator}")
 
     return
 
