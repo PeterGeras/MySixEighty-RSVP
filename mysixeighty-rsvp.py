@@ -1,3 +1,4 @@
+import os
 import timeit
 import time
 
@@ -19,7 +20,7 @@ SHORT_TIME = 0.2 * SEC
 ELEMENT_WAIT_TIME = 2 * SEC
 PAGE_WAIT_TIME = 10 * SEC
 LOOP_TIME = 1 * MIN
-LOGIN_WAIT_TIME = 2 * MIN
+LOGIN_TIME = 2 * MIN
 
 MAX_TRIES = int(PAGE_WAIT_TIME / SHORT_TIME)
 
@@ -51,7 +52,7 @@ def login_load():
         # Enter login details manually
         print("# Please log in manually...")
         try:
-            WebDriverWait(driver, LOGIN_WAIT_TIME).until(
+            WebDriverWait(driver, LOGIN_TIME).until(
                 EC.presence_of_element_located((By.ID, account_logged_id))
             )
         except:
@@ -136,12 +137,15 @@ def events_find():
 
 def event_looping():
     completed_list = []
+    events_file = os.path.basename(config.EVENTS)
+    header_title = "### ATTEMPTING TO ACCESS EVENTS ###"
+    header_outline = len(header_title)*"#"
 
     goto_events = config.get_events_selected()
-    print_event_list_details(f"Events chosen from {config.EVENTS}", goto_events)
+    print_event_list_details(f"Events chosen from {events_file}", goto_events)
 
     if len(goto_events) == 0:
-        print(f"# No selected events from {config.EVENTS} found")
+        print(f"# No selected events found from {events_file}")
         return False
 
     if login_load() is False:
@@ -153,7 +157,7 @@ def event_looping():
             return False
 
         all_events = events_find()
-        print_event_list_details(f"Events found on the website {config.EVENTS_URL}", all_events)
+        print_event_list_details(f"Events found on {config.EVENTS_URL}", all_events)
 
         intersection_list = intersection_events_lists(all_events, goto_events)
         intersection_list = difference_events_lists(intersection_list, completed_list)
@@ -163,7 +167,7 @@ def event_looping():
         print_event_list_details("Events chosen & Events not found", missing_list)
 
         for event in intersection_list:
-            print(f"\n### ATTEMPTING TO ACCESS EVENTS ###")
+            print(f"\n{header_outline}\n{header_title}\n{header_outline}")
             rsvp_completed = event_rsvp(driver, event)  # TODO: Deal with status of event that's filled
             if rsvp_completed:
                 completed_list.append(event)
