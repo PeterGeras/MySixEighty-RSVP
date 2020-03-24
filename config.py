@@ -1,8 +1,10 @@
 import os
 import xlrd
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from Event import Event
+
 
 # Working directories
 cwd = os.getcwd()
@@ -10,8 +12,16 @@ drivers = os.path.join(cwd, 'drivers')
 logs = os.path.join(cwd, 'logs')
 
 # Browser
+caps = DesiredCapabilities().FIREFOX
+# caps["pageLoadStrategy"] = "normal"  # complete
+caps["pageLoadStrategy"] = "eager"  # interactive
+# caps["pageLoadStrategy"] = "none"
 driver_loc = os.path.join(drivers, 'geckodriver-win-v0.26')
-driver = webdriver.Firefox(executable_path=driver_loc, log_path=os.path.join(logs, 'geckodriver.log'))
+driver = webdriver.Firefox(
+    desired_capabilities=caps,
+    executable_path=driver_loc,
+    log_path=os.path.join(logs, 'geckodriver.log')
+)
 
 # URL config
 HOME_URL = 'https://mysixeighty.com.au'
