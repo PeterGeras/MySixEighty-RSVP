@@ -32,31 +32,14 @@ def login_load():
 
     account_logged_id = "menu-trigger-account"
 
-    login_details_captured = config.get_login_data()
-    if login_details_captured is True:
-        # Enter login details automatically
-        try:
-            email = driver.find_element_by_id("edit-email")
-            email.send_keys(config.Login_Data['email'])
-
-            password = driver.find_element_by_id("edit-password")
-            password.send_keys(config.Login_Data['password'])
-
-            login = driver.find_element_by_id("edit-submit")
-            login.click()
-        except Exception as ex:
-            print("# Logging in automatically failed")
-            return False
-    else:
-        # Enter login details manually
-        print("# Please log in manually...")
-        try:
-            WebDriverWait(driver, LOGIN_TIME).until(
-                EC.presence_of_element_located((By.ID, account_logged_id))
-            )
-        except Exception as ex:
-            print("# Login took too long")
-            return False
+    print("# Please log in manually...")
+    try:
+        WebDriverWait(driver, LOGIN_TIME).until(
+            EC.presence_of_element_located((By.ID, account_logged_id))
+        )
+    except Exception as ex:
+        print("# Login took too long")
+        return False
 
     # Check login happened and redirected to main page
     try:
@@ -193,8 +176,7 @@ def main():
     driver.close()
 
     stop = timeit.default_timer()
-    print("Program run time: " + "{0:.1f}".format(stop - start) + "s")
-    time.sleep(MIN)
+    print(f"\nProgram run time: {stop - start:.2f}s\n")
 
     return True
 

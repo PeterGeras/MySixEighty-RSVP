@@ -91,30 +91,6 @@ def save_cookies():
     return return_success
 
 
-def get_login_data():
-    print("")
-    # Update Login_Data dictionary
-
-    try:
-        wb_login = xlrd.open_workbook(LOGIN_DETAILS)
-        ws_login = wb_login.sheet_by_index(0)
-
-        email = ws_login.cell(1, 0).value
-        password = ws_login.cell(1, 1).value
-    except Exception as ex:
-        print(f"# Failed to grab email and password data from {LOGIN_DETAILS}")
-        return False
-
-    Login_Data['email'] = email
-    Login_Data['password'] = password
-
-    print(f"# Logged in with with data from {LOGIN_DETAILS}")
-    print(f"Login: {Login_Data['email']}")
-    print(f"Pass: {len(Login_Data['password'])*'*'}")
-
-    return True
-
-
 def get_events_selected():
     wb = xlrd.open_workbook(EVENTS)
     sheet = wb.sheet_by_index(0)
