@@ -98,7 +98,6 @@ def event_rsvp(this_driver, this_event):
         rsvp_button = find_rsvp()
         if rsvp_button:
             rsvp_completed = click_rsvp(rsvp_button)
-            time.sleep(ELEMENT_WAIT_TIME)
 
     close_window()
 

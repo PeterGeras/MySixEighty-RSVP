@@ -19,11 +19,13 @@ caps = DesiredCapabilities().FIREFOX
 caps["pageLoadStrategy"] = "eager"  # interactive
 # caps["pageLoadStrategy"] = "none"
 driver_loc = os.path.join(drivers, 'geckodriver-win-v0.26')
+log_file = os.path.join(logs, 'geckodriver.log')
 driver = webdriver.Firefox(
     desired_capabilities=caps,
     executable_path=driver_loc,
-    log_path=os.path.join(logs, 'geckodriver.log')
+    log_path=log_file
 )
+open(log_file, 'w').close()  # Clear contents of log file
 
 # Cookies
 cookies_pickle_file = drivers + r'\cookies.pkl'
@@ -53,7 +55,6 @@ Week = {
 
 def load_cookies():
     return_success = False
-
 
     print("")
     try:
