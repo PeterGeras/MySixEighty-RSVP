@@ -5,7 +5,6 @@ import time
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 
 import config
@@ -45,7 +44,7 @@ def login_load():
 
             login = driver.find_element_by_id("edit-submit")
             login.click()
-        except:
+        except Exception as ex:
             print("# Logging in automatically failed")
             return False
     else:
@@ -55,7 +54,7 @@ def login_load():
             WebDriverWait(driver, LOGIN_TIME).until(
                 EC.presence_of_element_located((By.ID, account_logged_id))
             )
-        except:
+        except Exception as ex:
             print("# Login took too long")
             return False
 
@@ -64,7 +63,7 @@ def login_load():
         WebDriverWait(driver, PAGE_WAIT_TIME).until(
             EC.presence_of_element_located((By.ID, account_logged_id))
         )
-    except:
+    except Exception as ex:
         print(f"# Login redirection to main page failed? div_id {account_logged_id} not found")
         return False
 
@@ -108,13 +107,13 @@ def events_find():
 
     try:
         events_form = driver.find_element_by_class_name("events-week-list")
-    except:
+    except Exception as ex:
         print("# div should have been found earlier in events_load()")
         return False
 
     try:
         events_week = events_form.find_elements_by_xpath(".//div[@class='event-week']")
-    except:
+    except Exception as ex:
         print("# Page code structure changed, aborting")
         return False
 
@@ -126,7 +125,7 @@ def events_find():
     for week, event_week in enumerate(events_week, config.THIS_WEEK):
         try:
             event_cards = event_week.find_elements_by_xpath(".//div[@class='event-card']")
-        except:
+        except Exception as ex:
             print("# Page code structure changed, aborting")
             return False
         for e in event_cards:
@@ -148,8 +147,11 @@ def event_looping():
         print(f"# No selected events found from {events_file}")
         return False
 
-    if login_load() is False:
-        return False
+    if config.load_cookies() is False:
+        if login_load():
+            config.save_cookies()
+        else:
+            return False
 
     # Looping to continue processing events until all processed
     while True:

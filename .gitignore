@@ -2,6 +2,8 @@
 venv/
 Application/
 
+drivers/cookies.pkl
+
 logs/*.*
 !logs/.gitkeep
 

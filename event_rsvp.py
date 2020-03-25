@@ -59,19 +59,29 @@ def find_rsvp():
 
 def click_rsvp(rsvp):
     rsvp_first_text = rsvp.text.split('\n')[0]
+    already_going_text = "You're going"
     rsvp_completed = False
 
     if rsvp_first_text == "RSVP":
         try:
+            # Click RSVP url
             rsvp.find_element_by_tag_name('a').click()
+
+            # Click Agree dialog
             WebDriverWait(driver, ELEMENT_WAIT_TIME)\
                 .until(EC.presence_of_element_located((By.CLASS_NAME, "confirm-button")))\
                 .click()
+
+            # Wait for response to confirm we've RSVPed
+            WebDriverWait(driver, ELEMENT_WAIT_TIME).until(
+                ElementTextMatch((By.CLASS_NAME, "rsvp-button"), already_going_text)
+            )
+
             print(f"# RSVPed to - {event.title} - {event.url}")
             rsvp_completed = True
-        except:
+        except Exception as ex:
             print(f"# Failed to RSVP to - {event.title} - {event.url}")
-    elif rsvp_first_text == "You're going":
+    elif rsvp_first_text == already_going_text:
         print(f"# Already going to - {event.title} - {event.url}")
         rsvp_completed = True
 

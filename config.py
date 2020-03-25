@@ -2,6 +2,8 @@ import os
 import xlrd
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.common.exceptions import InvalidCookieDomainException
+import pickle
 
 from Event import Event
 
@@ -22,6 +24,9 @@ driver = webdriver.Firefox(
     executable_path=driver_loc,
     log_path=os.path.join(logs, 'geckodriver.log')
 )
+
+# Cookies
+cookies_pickle_file = drivers + r'\cookies.pkl'
 
 # URL config
 HOME_URL = 'https://mysixeighty.com.au'
@@ -46,16 +51,56 @@ Week = {
 }
 
 
+def load_cookies():
+    return_success = False
+
+
+    print("")
+    try:
+        with open(cookies_pickle_file, 'rb') as f:
+            # Dummy URL needs to load first before loading cookies successfully
+            driver.get(HOME_URL + '/404error')
+            for cookie in pickle.load(f):
+                driver.add_cookie(cookie)
+        print(f"# Cookies loaded from {cookies_pickle_file}")
+        return_success = True
+    except FileNotFoundError:
+        print(f"# Cookies not found at {cookies_pickle_file}")
+    except InvalidCookieDomainException:
+        print(f"# Cookies need to be loaded from a 404 error page")
+    except Exception as ex:
+        print(f"# Pickling load error with {cookies_pickle_file}")
+
+    return return_success
+
+
+def save_cookies():
+    return_success = False
+
+    print("")
+    try:
+        pickle.dump(driver.get_cookies(), open(cookies_pickle_file, "wb"))
+        print(f"# Cookies saved to {cookies_pickle_file}")
+        return_success = True
+    except IOError:
+        print(f"# Cookies unable to be saved to {cookies_pickle_file}")
+    except Exception as ex:
+        print(f"# Pickling save error with {cookies_pickle_file}")
+
+    return return_success
+
+
 def get_login_data():
     print("")
     # Update Login_Data dictionary
+
     try:
         wb_login = xlrd.open_workbook(LOGIN_DETAILS)
         ws_login = wb_login.sheet_by_index(0)
 
         email = ws_login.cell(1, 0).value
         password = ws_login.cell(1, 1).value
-    except:
+    except Exception as ex:
         print(f"# Failed to grab email and password data from {LOGIN_DETAILS}")
         return False
 
